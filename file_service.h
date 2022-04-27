@@ -11,7 +11,7 @@ void setMode(char *path, mode_t newMode);
 
 int isDirectory(char *path);
 
-int existsInDirectory(DIR *directory, char *fileName)
+int existsInDirectory(DIR *directory, char *fileName);
 
 char *appendToPath(char *path, char *attach);
 
@@ -19,13 +19,13 @@ void copyFile(char* src, char* dest, int size);
 
 off_t getFileSize(char* path);
 
-void removeFile(char *path)
+void removeFile(char *path);
 
 void removeDirectory(char *path);
 
 void startDaemon();
 
-void sync(DIR* src, DIR* dest)
+void sync(DIR* src, DIR* dest);
 
 void signalHandler(int signal);
 
