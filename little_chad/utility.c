@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 //#include <unistd.h>
+#include <syslog.h>
 
 char *appendToPath(const char *path, const char *attach) {
     char *newPath = malloc(strlen(path) + strlen(attach) + 1);
