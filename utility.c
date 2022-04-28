@@ -2,7 +2,7 @@
 #include"commons.h"
 
 char *appendToPath(const char *path, const char *attach) {
-    char *newPath = malloc(strlen(path) + strlen(attach) + 1);
+    char *newPath = malloc(strlen(path) + strlen(attach) + 2);
 
     strcpy(newPath, path);
     strcat(newPath, "/");
@@ -11,15 +11,18 @@ char *appendToPath(const char *path, const char *attach) {
     return newPath;
 }
 
-void signalHandler(int signal) {
+void signalHandler(int sig) {
     //initial handler, to revise
 
+    if(sig == SIGUSR1){
+    	
+    }
     if (sig == SIGTERM) {
         syslog(LOG_INFO, "The demon has been stopped");
         exit(EXIT_SUCCESS);
     }
 
-    signal(sig, on_signal);
+    signal(sig, signalHandler);
 }
 
 void startDaemon() {

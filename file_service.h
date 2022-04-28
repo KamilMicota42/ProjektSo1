@@ -1,7 +1,7 @@
 #ifndef SOPROJECT_FILE_SERVICE_H
 #define SOPROJECT_FILE_SERVICE_H
+#include "commons.h"
 
-extern int isRecursive;
 extern int fileCopyLimit;
 
 mode_t getMode(const char *path);

@@ -2,9 +2,8 @@
 #include "commons.h"
 #include "utility.h"
 
-int isRecursive = 0;
 int fileCopyLimit = 5000;
-git s
+
 mode_t getMode(const char *path) {
     struct stat mode;
 
@@ -34,17 +33,23 @@ off_t getFileSize(const char *path) {
 
 void setDateOfModify(const char *path, time_t newDate) {
     struct utimbuf newDateBuf;
-    newDate.actime = 0;
-    newDate.modtime = newDate;
+    newDateBuf.actime = 0;
+    newDateBuf.modtime = newDate;
 
-    if (utime(path, &newDateBuf) != 0)
-        exit(EXIT_FAILURE);
+    if (utime(path, &newDateBuf) != 0){
+    	syslog(LOG_ERR, "setDateOfModify error");
+    	exit(EXIT_FAILURE);
+    }
+        
 
 }
 
 void setMode(const char *path, mode_t newMode) {
-    if (chmod(path, newMode) != 0)
-        exit(EXIT_FAILURE);
+    if (chmod(path, newMode) != 0){
+    	syslog(LOG_ERR, "setMode error");
+    	exit(EXIT_FAILURE);
+    }
+        
 }
 
 int isDirectory(const char *path) {
@@ -68,11 +73,12 @@ int fileExists(const char *path, int shouldBeDirectory) {
 
 }
 
-void aboveLimitCopy(const char *src, const char *dest) {
+void belowLimitCopy(const char *src, const char *dest) {
     int sourceFile = open(src, O_RDONLY);
     int destFile = open(dest, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
     if (sourceFile < 0 || destFile < 0) {
+    	syslog(LOG_ERR, "no such file - below limit copy");
         exit(EXIT_FAILURE);
     }
 
@@ -91,7 +97,7 @@ void aboveLimitCopy(const char *src, const char *dest) {
     setMode(dest, getMode(src));
 }
 
-void belowLimitCopy(const char *src, const char *dest) {
+void aboveLimitCopy(const char *src, const char *dest) {
     int sourceFile = open(src, O_RDONLY);
     int destFile = open(dest, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 

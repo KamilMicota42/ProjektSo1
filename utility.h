@@ -4,7 +4,7 @@
 
 char *appendToPath(const char *path, const char *attach);
 
-void signalHandler(int signal);
+void signalHandler(int sig);
 
 void startDaemon();
 
