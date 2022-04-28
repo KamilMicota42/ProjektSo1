@@ -1,31 +1,35 @@
 #ifndef SOPROJECT_FILE_SERVICE_H
 #define SOPROJECT_FILE_SERVICE_H
 
-mode_t getMode(char *path);
+extern int isRecursive;
 
-time_t getDateOfModify(char *path);
+mode_t getMode(const char *path);
 
-void setDateOfModify(char *path, time_t newDate);
+time_t getDateOfModify(const char *path);
 
-void setMode(char *path, mode_t newMode);
+void setDateOfModify(const char *path, time_t newDate);
 
-int isDirectory(char *path);
+void setMode(const char *path, mode_t newMode);
 
-int existsInDirectory(DIR *directory, char *fileName);
+int isDirectory(const char *path);
 
-char *appendToPath(char *path, char *attach);
+int fileExists(const char* path, int shouldBeDirectory);
 
-void copyFile(char* src, char* dest, int size);
+char *appendToPath(const char *path, const char *attach);
 
-off_t getFileSize(char* path);
+void copyFile(const char* src, const char* dest, int isDirectory);
 
-void removeFile(char *path);
+off_t getFileSize(const char* path);
 
-void removeDirectory(char *path);
+void removeFile(const char *path);
 
 void startDaemon();
 
-void sync(DIR* src, DIR* dest);
+void deleteNotMatching(const char* srcPath, const char* destPath);
+
+void copyNotMatching(const char* srcPath, const char* destPath);
+
+void sync(const char* sourcePath, const char* destPath);
 
 void signalHandler(int signal);
 
