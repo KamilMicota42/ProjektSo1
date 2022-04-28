@@ -1,5 +1,5 @@
 #include "utility.h"
-
+#include"commons.h"
 
 char *appendToPath(const char *path, const char *attach) {
     char *newPath = malloc(strlen(path) + strlen(attach) + 1);

@@ -1,5 +1,7 @@
 #include "synchronize.h"
 #include "commons.h"
+#include "utility.h"
+
 
 void deleteNotMatching(const char *srcPath, const char *destPath) {
     DIR *destDir = opendir(destPath);

@@ -1,9 +1,10 @@
 #include "file_service.h"
 #include "commons.h"
+#include "utility.h"
 
 int isRecursive = 0;
 int fileCopyLimit = 5000;
-
+git s
 mode_t getMode(const char *path) {
     struct stat mode;
 
