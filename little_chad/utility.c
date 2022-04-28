@@ -3,6 +3,7 @@
 #include <string.h>
 //#include <unistd.h>
 #include <syslog.h>
+#include <signal.h>
 
 char *appendToPath(const char *path, const char *attach) {
     char *newPath = malloc(strlen(path) + strlen(attach) + 1);
