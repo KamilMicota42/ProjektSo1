@@ -1,6 +1,7 @@
 #include "file_service.h"
 #include <sys/stat.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int isRecursive = 0;
 
