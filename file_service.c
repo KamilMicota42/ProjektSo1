@@ -132,11 +132,32 @@ void copyFile(const char *src, const char *dest, int isDirectory) {
 }
 
 
-void removeFile(const char *path) {
-    if (isDirectory(path))
-        rmdir(path);
+void recursiveDeleteDirectory(const char* path){
+    DIR *dirBeingDeleted = opendir(path);
+    struct dirent *file;
 
-    else remove(path);
+    while((file = readdir(dirBeingDeleted))){
+        if (strcmp(file->d_name, ".") == 0 || strcmp(file->d_name, "..") == 0)
+            continue;
+
+        const char* currFilePath = appendToPath(path, file->d_name);
+        if(isDirectory(currFilePath))
+            recursiveDeleteDirectory(currFilePath);
+
+        else remove(currFilePath);
+    }
+
+    closedir(dirBeingDeleted);
+    rmdir(path);
+}
+
+void removeFile(const char *path, int isRecursive) {
+    if (isDirectory(path) && isRecursive){
+        recursiveDeleteDirectory(path);
+    }
+
+    else if(!isDirectory(path))
+        remove(path);
 }
 
 

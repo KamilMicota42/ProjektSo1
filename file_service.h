@@ -24,6 +24,8 @@ void copyFile(const char* src, const char* dest, int isDirectory);
 
 off_t getFileSize(const char* path);
 
+void recursiveDeleteDirectory(const char* path);
+
 void removeFile(const char *path);
 
 
