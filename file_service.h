@@ -2,6 +2,7 @@
 #define SOPROJECT_FILE_SERVICE_H
 
 extern int isRecursive;
+extern int fileCopyLimit;
 
 mode_t getMode(const char *path);
 
@@ -15,7 +16,9 @@ int isDirectory(const char *path);
 
 int fileExists(const char* path, int shouldBeDirectory);
 
-char *appendToPath(const char *path, const char *attach);
+void aboveLimitCopy(const char* src, const char* dest);
+
+void belowLimitCopy(const char* src, const char* dest);
 
 void copyFile(const char* src, const char* dest, int isDirectory);
 
@@ -23,15 +26,6 @@ off_t getFileSize(const char* path);
 
 void removeFile(const char *path);
 
-void startDaemon();
-
-void deleteNotMatching(const char* srcPath, const char* destPath);
-
-void copyNotMatching(const char* srcPath, const char* destPath);
-
-void sync(const char* sourcePath, const char* destPath);
-
-void signalHandler(int signal);
 
 
 #endif //SOPROJECT_FILE_SERVICE_H

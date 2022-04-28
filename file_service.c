@@ -1,7 +1,8 @@
 #include "file_service.h"
-#include <sys/stat.h>
+#include "commons.h"
 
 int isRecursive = 0;
+int fileCopyLimit = 5000;
 
 mode_t getMode(const char *path) {
     struct stat mode;
@@ -66,27 +67,62 @@ int fileExists(const char *path, int shouldBeDirectory) {
 
 }
 
-char *appendToPath(const char *path, const char *attach) {
-    char *newPath = malloc(strlen(path) + strlen(attach) + 1);
+void aboveLimitCopy(const char *src, const char *dest) {
+    int sourceFile = open(src, O_RDONLY);
+    int destFile = open(dest, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
-    strcpy(newPath, path);
-    strcat(newPath, "/");
-    strcat(newPath, attach);
+    if (sourceFile < 0 || destFile < 0) {
+        exit(EXIT_FAILURE);
+    }
 
-    return newPath;
+    char *buffer = (char *) malloc(getFileSize(src));
+
+    int bytesRead;
+
+    while ((bytesRead = read(sourceFile, buffer, sizeof(buffer))) > 0) {
+        write(destFile, buffer, (ssize_t) bytesRead);
+    }
+
+    close(sourceFile);
+    close(destFile);
+
+    setDateOfModify(dest, getDateOfModify(src));
+    setMode(dest, getMode(src));
+}
+
+void belowLimitCopy(const char *src, const char *dest) {
+    int sourceFile = open(src, O_RDONLY);
+    int destFile = open(dest, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+
+    if (sourceFile < 0 || destFile < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    int sourceFileSize = getFileSize(src);
+
+    char *mappedSourceFile = (char *) mmap(0, sourceFileSize, PROT_READ, MAP_SHARED | MAP_FILE, sourceFile, 0);
+
+    write(destFile, mappedSourceFile, sourceFileSize);
+
+    close(sourceFile);
+    close(destFile);
+    munmap(mappedSourceFile, sourceFileSize);
+
+    setDateOfModify(dest, getDateOfModify(src));
+    setMode(dest, getMode(src));
 }
 
 void copyFile(const char *src, const char *dest, int isDirectory) {
     if (isDirectory)
         mkdir(dest, getMode(src));
 
-        //todo
-        //copy file which is not directory
-    else {
+    else if (getFileSize(src) <= fileCopyLimit) {
+        belowLimitCopy(src, dest);
 
+    } else {
+        aboveLimitCopy(src, dest);
     }
 }
-
 
 
 void removeFile(const char *path) {
@@ -96,77 +132,5 @@ void removeFile(const char *path) {
     else remove(path);
 }
 
-void signalHandler(int signal) {
-    //initial handler, to revise
-
-    if (sig == SIGTERM) {
-        syslog(LOG_INFO, "The demon has been stopped");
-        exit(EXIT_SUCCESS);
-    }
-
-    signal(sig, on_signal);
-}
-
-void startDaemon() {
-    pid_t pid;
-    pid = fork();
-
-    if (pid < 0) {
-        exit(EXIT_FAILURE);
-    }
-
-    if (pid > 0) {
-        exit(EXIT_SUCCESS);
-    } else {
-        signal(SIGUSR1, signalHandler);
-        signal(SIGTERM, signalHandler);
-    }
-
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
-}
-
-void deleteNotMatching(const char *srcPath, const char *destPath) {
-    DIR *destDir = opendir(destPath);
-    struct dirent *file;
-
-    while ((file = readdir(destDir))) {
-        const char *fileInSource = appendToPath(srcPath, file->d_name);
-        const char *fileInDest = appendToPath(destPath, file->d_name);
-        const int isDestFileDirectory = isDirectory(fileInDest);
-
-        if (!fileExists(fileInSource, isDestFileDirectory))
-            removeFile(fileInDest);
-    }
-}
-
-void copyNotMatching(const char *srcPath, const char *destPath) {
-    DIR *srcDir = opendir(srcPath);
-    struct dirent *file;
-
-    while ((file = readdir(srcDir))) {
-        const char *fileInSource = appendToPath(srcPath, file->d_name);
-        const char *fileInDest = appendToPath(destPath, file->d_name);
-        const int isSourceFileDirectory = isDirectory(fileInSource);
-
-        if (!fileExists(fileInDest, isSourceFileDirectory) ||
-            getDateOfModify(srcPath) < getDateOfModify(destPath)) {
-
-            copyFile(fileInSource, fileInDest, isDirectory(fileInSource));
-        }
-
-        if (isSourceFileDirectory && isRecursive)
-            sync(fileInSource, fileInDest);
-
-    }
-}
-
-void sync(const char *sourcePath, const char *destPath) {
-    //sleep for x seconds
-
-    deleteNotMatching(sourcePath, destPath);
-    copyNotMatching(sourcePath, destPath);
-}
 
 
