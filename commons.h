@@ -1,4 +1,3 @@
-
 #ifndef SOPROJECT_COMMONS_H
 #define SOPROJECT_COMMONS_H
 

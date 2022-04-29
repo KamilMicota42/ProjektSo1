@@ -1,8 +1,11 @@
 #include "file_service.h"
-#include "commons.h"
 #include "utility.h"
 
 int fileCopyLimit = 5000;
+
+void setFileCopyLimit(int limit){
+    fileCopyLimit = limit;
+}
 
 mode_t getMode(const char *path) {
     struct stat mode;
@@ -36,20 +39,17 @@ void setDateOfModify(const char *path, time_t newDate) {
     newDateBuf.actime = 0;
     newDateBuf.modtime = newDate;
 
-    if (utime(path, &newDateBuf) != 0){
-    	syslog(LOG_ERR, "setDateOfModify error");
-    	exit(EXIT_FAILURE);
+    if (utime(path, &newDateBuf) != 0) {
+        syslog(LOG_ERR, "%s %s\n", getCurrentTime(), "Exception - in setDateOfModify");
+        exit(EXIT_FAILURE);
     }
-        
-
 }
 
 void setMode(const char *path, mode_t newMode) {
-    if (chmod(path, newMode) != 0){
-    	syslog(LOG_ERR, "setMode error");
-    	exit(EXIT_FAILURE);
+    if (chmod(path, newMode) != 0) {
+        syslog(LOG_ERR, "%s %s\n", getCurrentTime(), "Exception - in setMode");
+        exit(EXIT_FAILURE);
     }
-        
 }
 
 int isDirectory(const char *path) {
@@ -59,18 +59,16 @@ int isDirectory(const char *path) {
         return S_ISDIR(isDirBuf.st_mode) > 0 ? 1 : 0;
 
     else return 0;
-
 }
 
 int fileExists(const char *path, int shouldBeDirectory) {
     int exists = access(path, F_OK) == 0 ? 1 : 0;
 
-    if (shouldBeDirectory && !isDirectory(path)) {
+    if ((shouldBeDirectory && !isDirectory(path)) || (!shouldBeDirectory && isDirectory(path))) {
         exists = 0;
     }
 
     return exists;
-
 }
 
 void belowLimitCopy(const char *src, const char *dest) {
@@ -78,7 +76,7 @@ void belowLimitCopy(const char *src, const char *dest) {
     int destFile = open(dest, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
     if (sourceFile < 0 || destFile < 0) {
-    	syslog(LOG_ERR, "no such file - below limit copy");
+        syslog(LOG_ERR, "%s %s\n", getCurrentTime(), "No such file exception - in belowLimitCopy");
         exit(EXIT_FAILURE);
     }
 
@@ -102,11 +100,11 @@ void aboveLimitCopy(const char *src, const char *dest) {
     int destFile = open(dest, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
     if (sourceFile < 0 || destFile < 0) {
+        syslog(LOG_ERR, "%s %s\n", getCurrentTime(), "No such file exception - in aboveLimitCopy");
         exit(EXIT_FAILURE);
     }
 
     int sourceFileSize = getFileSize(src);
-
     char *mappedSourceFile = (char *) mmap(0, sourceFileSize, PROT_READ, MAP_SHARED | MAP_FILE, sourceFile, 0);
 
     write(destFile, mappedSourceFile, sourceFileSize);
@@ -132,16 +130,16 @@ void copyFile(const char *src, const char *dest, int isDirectory) {
 }
 
 
-void recursiveDeleteDirectory(const char* path){
+void recursiveDeleteDirectory(const char *path) {
     DIR *dirBeingDeleted = opendir(path);
     struct dirent *file;
 
-    while((file = readdir(dirBeingDeleted))){
+    while ((file = readdir(dirBeingDeleted))) {
         if (strcmp(file->d_name, ".") == 0 || strcmp(file->d_name, "..") == 0)
             continue;
 
-        const char* currFilePath = appendToPath(path, file->d_name);
-        if(isDirectory(currFilePath))
+        const char *currFilePath = appendToPath(path, file->d_name);
+        if (isDirectory(currFilePath))
             recursiveDeleteDirectory(currFilePath);
 
         else remove(currFilePath);
@@ -152,11 +150,9 @@ void recursiveDeleteDirectory(const char* path){
 }
 
 void removeFile(const char *path, int isRecursive) {
-    if (isDirectory(path) && isRecursive){
+    if (isDirectory(path) && isRecursive) {
         recursiveDeleteDirectory(path);
-    }
-
-    else if(!isDirectory(path))
+    } else if (!isDirectory(path))
         remove(path);
 }
 

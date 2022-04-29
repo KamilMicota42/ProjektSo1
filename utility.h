@@ -1,4 +1,3 @@
-
 #ifndef SOPROJECT_UTILITY_H
 #define SOPROJECT_UTILITY_H
 

@@ -4,6 +4,8 @@
 
 extern int fileCopyLimit;
 
+void setFileCopyLimit(int limit);
+
 mode_t getMode(const char *path);
 
 time_t getDateOfModify(const char *path);

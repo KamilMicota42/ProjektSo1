@@ -2,7 +2,11 @@
 #include "commons.h"
 #include "utility.h"
 
-int isRecursive = 1;
+int isRecursive = 0;
+
+void setAsRecursive(){
+    isRecursive = 1;
+}
 
 void deleteNotMatching(const char *srcPath, const char *destPath) {
     DIR *destDir = opendir(destPath);
@@ -17,7 +21,7 @@ void deleteNotMatching(const char *srcPath, const char *destPath) {
         const int isDestFileDirectory = isDirectory(fileInDest);
 
         if (!fileExists(fileInSource, isDestFileDirectory)) {
-            syslog(LOG_INFO, "File removed %s", fileInDest);
+            syslog(LOG_INFO, "%s %s\n", getCurrentTime(), "File removed %s", fileInDest);
             removeFile(fileInDest, isRecursive);
         }
 
@@ -41,10 +45,10 @@ void copyNotMatching(const char *srcPath, const char *destPath) {
             getDateOfModify(srcPath) < getDateOfModify(destPath)) {
 
             copyFile(fileInSource, fileInDest, isSourceFileDirectory);
-            syslog(LOG_INFO, "File created %s", fileInDest);
+            syslog(LOG_INFO, "%s %s\n", getCurrentTime(), "File created %s", fileInDest);
         }
 
-        if (isSourceFileDirectory && isDirectory(fileInDest) && isRecursive)
+        if (isSourceFileDirectory && isRecursive)
             syncDirectories(fileInSource, fileInDest);
 
     }
@@ -52,7 +56,6 @@ void copyNotMatching(const char *srcPath, const char *destPath) {
 }
 
 void syncDirectories(const char *sourcePath, const char *destPath) {
-    //sleep for x seconds
     deleteNotMatching(sourcePath, destPath);
     copyNotMatching(sourcePath, destPath);
 }
