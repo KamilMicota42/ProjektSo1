@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     const char *dest = argv[2];
 
     int readSleepTime;
-    int sleepTime = 350;
+    int sleepTime = 5;
     int copyLimit;
 
     for (int i = 3; i < argc; ++i) {

@@ -1,7 +1,7 @@
 OBJ = main.o file_service.o utility.o synchronize.o
-all: Project
-Project: $(OBJ)
-	gcc $(OBJ) -o Project
+all: sync
+sync: $(OBJ)
+	gcc $(OBJ) -o sync
 $(obj): commons.h file_service.h utility.h synchronize.h
 .PHONY: clean
 clean:

@@ -40,14 +40,14 @@ void setDateOfModify(const char *path, time_t newDate) {
     newDateBuf.modtime = newDate;
 
     if (utime(path, &newDateBuf) != 0) {
-        syslog(LOG_ERR, "%s %s\n", getCurrentTime(), "Exception - in setDateOfModify");
+        syslog(LOG_ERR, "Exception - in setDateOfModify");
         exit(EXIT_FAILURE);
     }
 }
 
 void setMode(const char *path, mode_t newMode) {
     if (chmod(path, newMode) != 0) {
-        syslog(LOG_ERR, "%s %s\n", getCurrentTime(), "Exception - in setMode");
+        syslog(LOG_ERR, "Exception - in setMode");
         exit(EXIT_FAILURE);
     }
 }
@@ -76,7 +76,7 @@ void belowLimitCopy(const char *src, const char *dest) {
     int destFile = open(dest, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
     if (sourceFile < 0 || destFile < 0) {
-        syslog(LOG_ERR, "%s %s\n", getCurrentTime(), "No such file exception - in belowLimitCopy");
+        syslog(LOG_ERR, "No such file exception - in belowLimitCopy");
         exit(EXIT_FAILURE);
     }
 
@@ -100,7 +100,7 @@ void aboveLimitCopy(const char *src, const char *dest) {
     int destFile = open(dest, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
     if (sourceFile < 0 || destFile < 0) {
-        syslog(LOG_ERR, "%s %s\n", getCurrentTime(), "No such file exception - in aboveLimitCopy");
+        syslog(LOG_ERR, "No such file exception - in aboveLimitCopy");
         exit(EXIT_FAILURE);
     }
 
@@ -121,10 +121,10 @@ void copyFile(const char *src, const char *dest, int isDirectory, int isRecursiv
     if (isDirectory && isRecursive)
         mkdir(dest, getMode(src));
 
-    else if (getFileSize(src) <= fileCopyLimit) {
+    else if (!isDirectory && getFileSize(src) <= fileCopyLimit) {
         belowLimitCopy(src, dest);
 
-    } else {
+    } else if(!isDirectory) {
         aboveLimitCopy(src, dest);
     }
 }

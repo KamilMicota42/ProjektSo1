@@ -21,8 +21,8 @@ void deleteNotMatching(const char *srcPath, const char *destPath) {
         const int isDestFileDirectory = isDirectory(fileInDest);
 
         if (!fileExists(fileInSource, isDestFileDirectory)) {
-            syslog(LOG_INFO, "%s %s\n", getCurrentTime(), "File removed %s", fileInDest);
             removeFile(fileInDest, isRecursive);
+            syslog(LOG_INFO, "File removed %s", fileInDest);
         }
 
     }
@@ -45,7 +45,7 @@ void copyNotMatching(const char *srcPath, const char *destPath) {
             getDateOfModify(srcPath) < getDateOfModify(destPath)) {
 
             copyFile(fileInSource, fileInDest, isSourceFileDirectory, isRecursive);
-            syslog(LOG_INFO, "%s %s\n", getCurrentTime(), "File created %s", fileInDest);
+            syslog(LOG_INFO, "File created %s", fileInDest);
         }
 
         if (isSourceFileDirectory && isRecursive)
