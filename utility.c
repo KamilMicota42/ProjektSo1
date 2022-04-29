@@ -24,7 +24,6 @@ char *appendToPath(const char *path, const char *attach) {
 }
 
 void signalHandler(int sig) {
-    //initial handler, to revise
 
     if (sig == SIGUSR1) {
         syslog(LOG_INFO, "%s %s\n", getCurrentTime(), "The daemon was awakened.")

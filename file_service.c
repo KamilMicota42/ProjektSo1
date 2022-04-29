@@ -117,8 +117,8 @@ void aboveLimitCopy(const char *src, const char *dest) {
     setMode(dest, getMode(src));
 }
 
-void copyFile(const char *src, const char *dest, int isDirectory) {
-    if (isDirectory)
+void copyFile(const char *src, const char *dest, int isDirectory, int isRecursive) {
+    if (isDirectory && isRecursive)
         mkdir(dest, getMode(src));
 
     else if (getFileSize(src) <= fileCopyLimit) {

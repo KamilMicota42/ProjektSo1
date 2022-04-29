@@ -44,7 +44,7 @@ void copyNotMatching(const char *srcPath, const char *destPath) {
         if (!fileExists(fileInDest, isSourceFileDirectory) ||
             getDateOfModify(srcPath) < getDateOfModify(destPath)) {
 
-            copyFile(fileInSource, fileInDest, isSourceFileDirectory);
+            copyFile(fileInSource, fileInDest, isSourceFileDirectory, isRecursive);
             syslog(LOG_INFO, "%s %s\n", getCurrentTime(), "File created %s", fileInDest);
         }
 

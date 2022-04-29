@@ -22,7 +22,7 @@ void aboveLimitCopy(const char* src, const char* dest);
 
 void belowLimitCopy(const char* src, const char* dest);
 
-void copyFile(const char* src, const char* dest, int isDirectory);
+void copyFile(const char* src, const char* dest, int isDirectory, int isRecursive);
 
 off_t getFileSize(const char* path);
 
