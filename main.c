@@ -5,7 +5,11 @@
 int main(int argc, char *argv[]) {
     const char *src = argv[1];
     const char *dest = argv[2];
-
+    if(!isDirectory(src) || !isDirectory(dest)){
+    	syslog(LOG_ERR, "Not a directory!");
+    	exit(EXIT_FAILURE);
+    }
+    
     int readSleepTime;
     int sleepTime = 5;
     int copyLimit;

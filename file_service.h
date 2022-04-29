@@ -10,6 +10,8 @@ mode_t getMode(const char *path);
 
 time_t getDateOfModify(const char *path);
 
+int compareDates(const struct timespec dateOne, const struct timespec dateTwo);
+
 void setDateOfModify(const char *path, time_t newDate);
 
 void setMode(const char *path, mode_t newMode);
@@ -22,7 +24,7 @@ void aboveLimitCopy(const char* src, const char* dest);
 
 void belowLimitCopy(const char* src, const char* dest);
 
-void copyFile(const char* src, const char* dest, int isDirectory, int isRecursive);
+void copyFile(const char* src, const char* dest, int isRecursive);
 
 off_t getFileSize(const char* path);
 

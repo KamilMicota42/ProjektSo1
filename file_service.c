@@ -25,6 +25,12 @@ time_t getDateOfModify(const char *path) {
     else return 0;
 }
 
+int compareDates(const struct timespec dateOne, const struct timespec dateTwo){
+	if(dateOne.tv_sec == dateTwo.tv_sec)
+		return (dateOne.tv_nsec > dateTwo.tv_nsec) - (dateOne.tv_nsec < dateTwo.tv_nsec);
+		else return (dateOne.tv_nsec > dateOne.tv_nsec ? 1 : -1);
+}
+
 off_t getFileSize(const char *path) {
     struct stat fileSizeBuf;
 
@@ -63,11 +69,11 @@ int isDirectory(const char *path) {
 
 int fileExists(const char *path, int shouldBeDirectory) {
     int exists = access(path, F_OK) == 0 ? 1 : 0;
-
+ 
     if ((shouldBeDirectory && !isDirectory(path)) || (!shouldBeDirectory && isDirectory(path))) {
         exists = 0;
     }
-
+    
     return exists;
 }
 
@@ -93,6 +99,7 @@ void belowLimitCopy(const char *src, const char *dest) {
 
     setDateOfModify(dest, getDateOfModify(src));
     setMode(dest, getMode(src));
+    syslog(LOG_INFO, "File copied: %s", dest);
 }
 
 void aboveLimitCopy(const char *src, const char *dest) {
@@ -115,16 +122,21 @@ void aboveLimitCopy(const char *src, const char *dest) {
 
     setDateOfModify(dest, getDateOfModify(src));
     setMode(dest, getMode(src));
+    syslog(LOG_INFO, "File copied using map copy: %s", dest);
 }
 
-void copyFile(const char *src, const char *dest, int isDirectory, int isRecursive) {
-    if (isDirectory && isRecursive)
-        mkdir(dest, getMode(src));
-
-    else if (!isDirectory && getFileSize(src) <= fileCopyLimit) {
+void copyFile(const char *src, const char *dest, int isRecursive) {
+    int isSourceFileDirectory = isDirectory(src);
+    
+    if (isSourceFileDirectory && isRecursive){
+    	syslog(LOG_INFO, "Folder created %s", dest);
+    	mkdir(dest, getMode(src));
+    }
+        
+    else if (!isSourceFileDirectory && getFileSize(src) <= fileCopyLimit) {
         belowLimitCopy(src, dest);
 
-    } else if(!isDirectory) {
+    } else if(!isSourceFileDirectory) {
         aboveLimitCopy(src, dest);
     }
 }
@@ -142,18 +154,25 @@ void recursiveDeleteDirectory(const char *path) {
         if (isDirectory(currFilePath))
             recursiveDeleteDirectory(currFilePath);
 
-        else remove(currFilePath);
+        else{
+         remove(currFilePath);
+         syslog(LOG_INFO, "File removed %s", currFilePath);
+        }
     }
 
     closedir(dirBeingDeleted);
     rmdir(path);
+    syslog(LOG_INFO, "Folder removed %s", path);
 }
 
 void removeFile(const char *path, int isRecursive) {
     if (isDirectory(path) && isRecursive) {
         recursiveDeleteDirectory(path);
-    } else if (!isDirectory(path))
-        remove(path);
+    } else if (!isDirectory(path)){
+    	remove(path);
+    	syslog(LOG_INFO, "File removed %s", path);
+    }
+        
 }
 
 
